@@ -75,6 +75,8 @@ class DbtDag:
                      search_function: Callable,
                      max_depth: Optional[int] = None):
 
+        # TODO include/exclude tests
+
         if max_depth is None:
             max_depth = float('inf')
 
@@ -97,6 +99,12 @@ class DbtDag:
 
     def get_descendants(self, node_id: str, max_depth: Optional[int] = None):
         return self._get_lineage(node_id, self._get_immediate_descendants, max_depth)
+
+    def get_pairwise_dependencies(self):
+        pass
+
+    def get_tests(self, node_id: str):
+        pass
 
     def _populate(self):
         # add nodes
