@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import List
+from typing import List, Optional
 
 import networkx as nx
 
@@ -71,9 +71,10 @@ class DbtDag:
             raise Exception("Node doesn't exist.")
         return list(self.graph.successors(node_id))
 
-    def get_predecessors(self, node_id: str, max_depth=None):
-        if not max_depth:
+    def get_predecessors(self, node_id: str, max_depth: Optional[int] = None):
+        if max_depth is None:
             max_depth = float('inf')
+        assert max_depth > 0, "max_depth must be > 0"
         predecessors_by_depth = defaultdict(list)
         stack = [(node_id, 1) for node_id in self._get_immediate_predecessors(node_id)]
         seen = set()
