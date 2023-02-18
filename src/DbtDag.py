@@ -1,6 +1,8 @@
 import json
+from typing import Optional, List
 
 import networkx as nx
+from networkx.algorithms.traversal.depth_first_search import dfs_successors, dfs_predecessors
 
 
 class DbtNode:
@@ -49,8 +51,23 @@ class DbtDag:
         node = list(self.manifest["nodes"])[0]
         return node.split(".")[1]
 
-    def get_node_id(self, node_name: str, node_type="model") -> str:
-        return f"{node_type}.{self.dbt_project}.{node_name}."
+    def get_node_from_id(self, node_id: str):
+        if not node_id in self.graph.nodes:
+            raise Exception("node_id not found")
+        return self.graph.nodes[node_id]["node_object"]
+
+    def build_node_id(self, node_name: str, node_type="model") -> str:
+        return f"{node_type}.{self.dbt_project}.{node_name}"
+
+    def get_predecessors(self, node_id: str) -> List[str]:
+        if node_id not in self.graph.nodes:
+            raise Exception("Node doesn't exist.")
+        return list(self.graph.predecessors(node_id))
+
+    def get_successors(self, node_id: str) -> List[str]:
+        if node_id not in self.graph.nodes:
+            raise Exception("Node doesn't exist.")
+        return list(self.graph.successors(node_id))
 
     def populate(self):
 
@@ -63,7 +80,3 @@ class DbtDag:
         for node_id, children in self.manifest["child_map"].items():
             for child in children:
                 self.graph.add_edge(node_id, child)
-
-
-ddag = DbtDag(manifest_path="examples/jaffle_shop/manifest.json")
-ddag.populate()
