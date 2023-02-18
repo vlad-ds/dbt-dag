@@ -6,6 +6,8 @@ TODO
 - Add specific exceptions
 - Assist in creating the Airflow DAG
 - Have basic unit tests
+- Fix imports in tests
+- Package and publish
 
 Airflow DAG
 
