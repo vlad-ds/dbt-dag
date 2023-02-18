@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from typing import List
 
 import networkx as nx
@@ -60,23 +61,35 @@ class DbtDag:
     def build_node_id(self, node_name: str, node_type="model") -> str:
         return f"{node_type}.{self.dbt_project}.{node_name}"
 
-    def get_predecessors(self, node_id: str) -> List[str]:
+    def _get_immediate_predecessors(self, node_id: str) -> List[str]:
         if node_id not in self.graph.nodes:
             raise Exception("Node doesn't exist.")
         return list(self.graph.predecessors(node_id))
 
-    def get_successors(self, node_id: str) -> List[str]:
+    def _get_immediate_successors(self, node_id: str) -> List[str]:
         if node_id not in self.graph.nodes:
             raise Exception("Node doesn't exist.")
         return list(self.graph.successors(node_id))
 
-    def _populate(self):
+    def get_predecessors(self, node_id: str, max_depth=None):
+        if not max_depth:
+            max_depth = float('inf')
+        predecessors_by_depth = defaultdict(list)
+        stack = [(node_id, 1) for node_id in self._get_immediate_predecessors(node_id)]
+        seen = set()
+        while stack:
+            node_id, depth = stack.pop()
+            if node_id not in seen and depth <= max_depth:
+                predecessors_by_depth[depth].append(node_id)
+                seen.add(node_id)
+                stack += [(node_id, depth+1) for node_id in self._get_immediate_predecessors(node_id)]
+        return predecessors_by_depth
 
+    def _populate(self):
         # add nodes
         for node_id, node_dict in self.manifest["nodes"].items():
             node_object = DbtNode(node_id, node_dict)
             self.graph.add_node(node_id, node_object=node_object)
-
         # add edges
         for node_id, children in self.manifest["child_map"].items():
             for child in children:
