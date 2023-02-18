@@ -1,8 +1,7 @@
 import json
-from typing import Optional, List
+from typing import List
 
 import networkx as nx
-from networkx.algorithms.traversal.depth_first_search import dfs_successors, dfs_predecessors
 
 
 class DbtNode:
