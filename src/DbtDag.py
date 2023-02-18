@@ -41,6 +41,8 @@ class DbtDag:
         else:
             raise Exception("No manifest provided.")
 
+        self._populate()
+
     @property
     def dbt_schema_version(self) -> str:
         return self.manifest["metadata"]["dbt_schema_version"]
@@ -68,7 +70,7 @@ class DbtDag:
             raise Exception("Node doesn't exist.")
         return list(self.graph.successors(node_id))
 
-    def populate(self):
+    def _populate(self):
 
         # add nodes
         for node_id, node_dict in self.manifest["nodes"].items():
