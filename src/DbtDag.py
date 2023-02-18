@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 import networkx as nx
 
@@ -61,30 +61,42 @@ class DbtDag:
     def build_node_id(self, node_name: str, node_type="model") -> str:
         return f"{node_type}.{self.dbt_project}.{node_name}"
 
-    def _get_immediate_predecessors(self, node_id: str) -> List[str]:
+    def _get_immediate_ancestors(self, node_id: str) -> List[str]:
         if node_id not in self.graph.nodes:
             raise Exception("Node doesn't exist.")
         return list(self.graph.predecessors(node_id))
 
-    def _get_immediate_successors(self, node_id: str) -> List[str]:
+    def _get_immediate_descendants(self, node_id: str) -> List[str]:
         if node_id not in self.graph.nodes:
             raise Exception("Node doesn't exist.")
         return list(self.graph.successors(node_id))
 
-    def get_predecessors(self, node_id: str, max_depth: Optional[int] = None):
+    def _get_lineage(self, node_id: str,
+                     search_function: Callable,
+                     max_depth: Optional[int] = None):
+
         if max_depth is None:
             max_depth = float('inf')
+
         assert max_depth > 0, "max_depth must be > 0"
-        predecessors_by_depth = defaultdict(list)
-        stack = [(node_id, 1) for node_id in self._get_immediate_predecessors(node_id)]
+        lineage_by_depth = defaultdict(list)
+        stack = [(node_id, 1) for node_id in search_function(node_id)]
         seen = set()
+
         while stack:
             node_id, depth = stack.pop()
             if node_id not in seen and depth <= max_depth:
-                predecessors_by_depth[depth].append(node_id)
+                lineage_by_depth[depth].append(node_id)
                 seen.add(node_id)
-                stack += [(node_id, depth+1) for node_id in self._get_immediate_predecessors(node_id)]
-        return predecessors_by_depth
+                stack += [(node_id, depth+1) for node_id in search_function(node_id)]
+
+        return lineage_by_depth
+
+    def get_ancestors(self, node_id: str, max_depth: Optional[int] = None):
+        return self._get_lineage(node_id, self._get_immediate_ancestors, max_depth)
+
+    def get_descendants(self, node_id: str, max_depth: Optional[int] = None):
+        return self._get_lineage(node_id, self._get_immediate_descendants, max_depth)
 
     def _populate(self):
         # add nodes
