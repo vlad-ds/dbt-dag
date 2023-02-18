@@ -5,11 +5,11 @@ import networkx as nx
 
 class DbtNode:
     def __init__(self,
-                 full_name: str,
+                 node_id: str,
                  node_dict: dict):
 
-        self.full_name = full_name
-        parts = full_name.split(".")
+        self.node_id = node_id
+        parts = node_id.split(".")
         self.node_type = parts[0]
         self.dbt_project = parts[1]
         self.node_name = parts[2]
@@ -18,10 +18,10 @@ class DbtNode:
         self.node_dict = node_dict
 
     def __hash__(self):
-        return hash(self.full_name)
+        return hash(self.node_id)
 
     def __str__(self):
-        return self.full_name
+        return self.node_id
 
 
 class DbtDag:
@@ -41,20 +41,28 @@ class DbtDag:
             raise Exception("No manifest provided.")
 
     @property
-    def dbt_schema_version(self):
+    def dbt_schema_version(self) -> str:
         return self.manifest["metadata"]["dbt_schema_version"]
+
+    @property
+    def dbt_project(self) -> str:
+        node = list(self.manifest["nodes"])[0]
+        return node.split(".")[1]
+
+    def get_node_id(self, node_name: str, node_type="model") -> str:
+        return f"{node_type}.{self.dbt_project}.{node_name}."
 
     def populate(self):
 
         # add nodes
-        for node_name, node_dict in self.manifest["nodes"].items():
-            node_object = DbtNode(node_name, node_dict)
-            self.graph.add_node(node_name, node_object=node_object)
+        for node_id, node_dict in self.manifest["nodes"].items():
+            node_object = DbtNode(node_id, node_dict)
+            self.graph.add_node(node_id, node_object=node_object)
 
         # add edges
-        for node_name, children in self.manifest["child_map"].items():
+        for node_id, children in self.manifest["child_map"].items():
             for child in children:
-                self.graph.add_edge(node_name, child)
+                self.graph.add_edge(node_id, child)
 
 
 ddag = DbtDag(manifest_path="examples/jaffle_shop/manifest.json")
