@@ -45,9 +45,16 @@ class DbtDag:
         return self.manifest["metadata"]["dbt_schema_version"]
 
     def populate(self):
-        nodes = [DbtNode(full_name, node_dict)
-                 for full_name, node_dict in self.manifest["nodes"].items()]
-        self.graph.add_nodes_from(nodes)
+
+        # add nodes
+        for node_name, node_dict in self.manifest["nodes"].items():
+            node_object = DbtNode(node_name, node_dict)
+            self.graph.add_node(node_name, node_object=node_object)
+
+        # add edges
+        for node_name, children in self.manifest["child_map"].items():
+            for child in children:
+                self.graph.add_edge(node_name, child)
 
 
 ddag = DbtDag(manifest_path="examples/jaffle_shop/manifest.json")
