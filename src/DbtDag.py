@@ -104,7 +104,8 @@ class DbtDag:
         pass
 
     def get_tests(self, node_id: str):
-        pass
+        return [node for node in self.get_descendants(node_id)[1]
+                if node.startswith("test.")]
 
     def _populate(self):
         # add nodes
