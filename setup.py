@@ -11,8 +11,8 @@ with open('requirements.txt') as f:
 
 setup(name='dbt-dag',
       version='0.1',
-      description='Expose the dbt dag as a NetworkX graph',
-      url='https://github.com/vlad-ds/dbt-dag', # TODO add public git url
+      description='Expose the dbt DAG as a NetworkX graph',
+      url='https://github.com/vlad-ds/dbt-dag',
       author='Vlad Gheorghe',
       author_email='vlad.datapro@gmail.com',
       license='TODO',
