@@ -1,6 +1,7 @@
 import unittest
 
 from dbt_dag.DbtDag import DbtNode, DbtDag
+from fixtures.jaffle_shop.lineage_maps import ancestors, descendants
 
 
 class TestGraphBuild(unittest.TestCase):
@@ -30,3 +31,20 @@ class TestGraphMethods(unittest.TestCase):
             node = self.dag.get_node_from_id(id_)
             self.assertIsInstance(node, DbtNode)
             self.assertEqual(node.node_id, id_)
+
+    def test_get_ancestors(self):
+        for ancestor in ancestors:
+            for depth, result in ancestors[ancestor].items():
+                self.assertEqual(dict(self.dag.get_ancestors(ancestor, max_depth=depth)), result)
+            max_depth = max(ancestors[ancestor].keys())
+            max_depth_result = ancestors[ancestor][max_depth]
+            self.assertEqual(dict(self.dag.get_ancestors(ancestor, max_depth=None)), max_depth_result)
+
+    def test_get_descendants(self):
+        for descendant in descendants:
+            for depth, result in descendants[descendant].items():
+                self.assertEqual(dict(self.dag.get_descendants(descendant, max_depth=depth)), result)
+            max_depth = max(descendants[descendant].keys())
+            max_depth_result = descendants[descendant][max_depth]
+            self.assertEqual(dict(self.dag.get_descendants(descendant, max_depth=None)), max_depth_result)
+
