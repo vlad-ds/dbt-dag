@@ -54,7 +54,7 @@ class DbtDag:
         return node.split(".")[1]
 
     def get_node_from_id(self, node_id: str):
-        if not node_id in self.graph.nodes:
+        if node_id not in self.graph.nodes:
             raise Exception("node_id not found")
         return self.graph.nodes[node_id]["node_object"]
 
