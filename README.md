@@ -5,7 +5,7 @@ This library addresses a current limitation of dbt: the inability to expose the 
 * Visualizing the DAG with any tool, not just `dbt docs`. 
 * Generating Airflow DAGs from the dbt DAG. 
 * Running tests on the workflow graph. 
-* Integrating the information with other lineage tools. 
+* Integrating the dbt DAG with other metadata and lineage tools. 
 
 The DBT dag is reconstructed from the `manifest.json` file and exposed as a [NetworkX DiGraph](https://networkx.org/documentation/stable/reference/classes/digraph.html). Thus, we don't need to interfere with dbt's internals to get the graph. NetworkX provides a rich and convenient library for dealing with graphs. We also provide some high-level methods on top of the NetworkX library. 
 
