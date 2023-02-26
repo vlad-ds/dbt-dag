@@ -106,11 +106,16 @@ class DbtDag:
                 if node.startswith("test.")]
 
     def _populate(self):
-        # add nodes
+        # add non-source nodes
         for node_id, node_dict in self.manifest["nodes"].items():
+            node_object = DbtNode(node_id, node_dict)
+            self.graph.add_node(node_id, node_object=node_object)
+        # add source nodes
+        for node_id, node_dict in self.manifest["sources"].items():
             node_object = DbtNode(node_id, node_dict)
             self.graph.add_node(node_id, node_object=node_object)
         # add edges
         for node_id, children in self.manifest["child_map"].items():
             for child in children:
+                assert node_id in self.graph.nodes and child in self.graph.nodes, f"One or both of {node_id}, {child} is not a node in the graph"
                 self.graph.add_edge(node_id, child)
